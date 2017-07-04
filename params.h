@@ -107,7 +107,7 @@ public:
   }
   ValueType type() const { return kValueTypeFloat;}
   float value() const { return value_;}
-  float value(AsmMachine& vm) const { return value_; }
+  float value_f(AsmMachine& vm) const { return value_; }
   private:
     float value_;
 };
