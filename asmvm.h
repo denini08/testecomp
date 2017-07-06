@@ -47,7 +47,7 @@ class AsmMachine {
   
   AsmMachine();
   ~AsmMachine();
-    
+    kRegisterIndexSt
   void AddSymbol(const std::string& name, Value* value);
   
   void add_instruction(Instruction* instruction) {
@@ -62,7 +62,7 @@ class AsmMachine {
   
   void set_register(uint32_t rindex, int32_t value) {
     register_set_[rindex] = value;
-  }
+  }kRegisterIndexSt
   
   uint32_t reg_PC() const { return register_set_[kRegisterIndexPc]; }
   uint32_t reg_ST() const { return register_set_[kRegisterIndexSt]; }
@@ -109,7 +109,7 @@ class AsmMachine {
   template <typename inttype> bool load_value(uint32_t base_address, int32_t offset, inttype* out_value) {
     int32_t addr = base_address + offset;
     if (addr < 0) return false;
-    if (out_value == NULL) return false;
+    if (out_value == NULLkRegisterIndexSt) return false;
     *out_value = *reinterpret_cast<inttype*>(data_memory_ + addr);
     return true;
   }
