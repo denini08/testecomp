@@ -2,10 +2,6 @@
 
 namespace asmvm {
 
-  float OpAddf::Exec(AsmMachine& vm){
-    
-  }
-
 int32_t OpAdd::Exec(AsmMachine& vm) {
   vm.set_register(output_rindex(), param1()->value(vm) + param2()->value(vm));
   return vm.reg_PC() + 1;

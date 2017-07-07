@@ -63,7 +63,7 @@ int yyerror(const char *msg)
 %token R_BRACKET
 %token COLON
 %token ASSIGN
-%token ADDF
+%token ADDL
 
 %token L_FLOAT 
 %token REGISTER_F
@@ -297,8 +297,8 @@ TernaryInstructions:
 
 
   TernaryFloat:
-  ADDF Source Source REGISTER_F {
-    $$ = new asmvm::OpAddf($2, $3, $4)
+  ADDL Source Source REGISTER_F {
+    $$ = new asmvm::OpAddl($2, $3, $4)
   }
   ;
 
