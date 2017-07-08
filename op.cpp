@@ -196,4 +196,14 @@ int32_t OpLd4::Exec(AsmMachine& vm) {
   return vm.reg_PC() + 1;
 }
 
+
+float OpLdF::Exec(AsmMachine& vm) {	//the group thomás
+  float value;
+  if (!vm.load_value(address_->address(vm), 0, &value)) {
+    printf("Invalid address [%d]. Default memory size = %d.\n", address_->address(vm), kDefaultMemorySize);
+  }
+  vm.set_register(rindex_, value);
+  return vm.reg_PC() + 1;
+}
+
 } // namespace asmvm

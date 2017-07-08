@@ -64,6 +64,7 @@ int yyerror(const char *msg)
 %token COLON
 %token ASSIGN
 %token ADDF
+%token LDF
 
 %token L_FLOAT 
 %token REGISTER_F
@@ -313,16 +314,22 @@ Load:
   | LD4 REGISTER Address {
     $$ = new asmvm::OpLd4($2, $3);
   }
+  | LDF REGISTER_F Address {	//the group thomás
+	$$ = new asmvm::OpLdF($2, $3);
+  }
   ;
 Source:
   REGISTER {
     $$ = new asmvm::RegisterSource($1);
   }
   | REGISTER_F {
-    $$ = new asmvm::RegisterSource($1);
+    $$ = new asmvm::RegisterSource_F($1);	//the group thomás
   }
   | IntValue {
     $$ = new asmvm::IntegerValue(asmvm::Value::kValueKindConst, $1);
+  }
+  | L_FLOAT {	//the group thomás
+	$$ = new asmvm::FloatValue(asmvm::Value::kValueKindVar, $1);
   }
   ;
 Address:

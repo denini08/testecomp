@@ -87,6 +87,7 @@ ST|PC|R[1-8] {
 "R13"               {yylval.rindex = 12 ; return REGISTER_F;}
 "R14"               {yylval.rindex = 13 ; return REGISTER_F;}
 "ADDF"              {return ADDF;}
+"LDF"				{return LDF;}	//the group thomás
 
 (0|[+-]?[1-9][0-9]*)\.([0-9]+) { yylval.float_value = atof(yytext); return L_FLOAT;} 
 0|[+-]?[1-9][0-9]* { yylval.int_value = atoi(yytext); return L_INT; }
