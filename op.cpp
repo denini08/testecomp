@@ -7,6 +7,11 @@ int32_t OpAdd::Exec(AsmMachine& vm) {
   return vm.reg_PC() + 1;
 }
 
+float OpAddf::Exec(AsmMachine& vm) { //the group geovanne
+  vm.set_register(output_rindex(), param1()->value(vm) + param2()->value(vm));
+  return vm.reg_PC() + 1;
+}
+
 int32_t OpSub::Exec(AsmMachine& vm) {
   vm.set_register(output_rindex(), param1()->value(vm) - param2()->value(vm));
   return vm.reg_PC() + 1;

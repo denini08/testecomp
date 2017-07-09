@@ -120,10 +120,10 @@ class RegisterSource : public Source {
   uint32_t rindex_;
 };
 
-class RegisterSource_F : public Source {	//the group thomás
+class RegisterSource_F : public Source {	//the group
  public:
-  explicit RegisterSource(float rindex) : rindex_(rindex) {}
-  float value(AsmMachine& vm) const { return vm.get_register(rindex_); }
+  explicit RegisterSource_F(float rindex) : rindex_(rindex) {}
+  float FloatValue(AsmMachine& vm) const { return vm.get_register(rindex_); }
  private:
   float rindex_;
 };
