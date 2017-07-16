@@ -290,6 +290,51 @@ class OpSt4 : public OpStore {
   int32_t Exec(AsmMachine& vm);
 };
 
+class OpSysCall : public Instruction {
+ public:
+  OpSysCall(Source* src, uint32_t rindex) : src_(src), rindex_(rindex) {}
+  int32_t Exec(AsmMachine& vm);
+ private:
+  Source* src_;
+  uint32_t rindex_;
+};
+
+class OpPushN : public Instruction {
+ public:
+  OpPushN(uint32_t bytes) : bytes_(bytes) {}
+  int32_t Exec(AsmMachine& vm);
+ private:
+  uint32_t bytes_; 
+};
+
+class OpPopN : public Instruction {
+ public:
+  OpPopN(uint32_t bytes) : bytes_(bytes) {}
+  int32_t Exec(AsmMachine& vm);
+ private:
+  uint32_t bytes_; 
+};
+
+class OpFprint : public Instruction {
+ public:
+  OpFprint(uint32_t rindex) : rindex_(rindex) {}
+  int32_t Exec(AsmMachine& vm);
+ private:
+  uint32_t rindex_;
+};
+
+class OpSprint : public Instruction {
+ public:
+  OpSprint(uint32_t rindex) : rindex_(rindex), reg_(true), str_(NULL) {}
+  OpSprint(const char* str) : rindex_(0), reg_(false), str_(str) {}
+  int32_t Exec(AsmMachine& vm);
+ private:
+  uint32_t rindex_;
+  bool reg_;
+  const char* str_;
+};
+
+
 } // namespace asmvm
 
 #endif

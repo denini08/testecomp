@@ -36,27 +36,29 @@ int yyerror(const char *msg)
 %token MV
 %token LD1
 %token LD2
-%token LD3
 %token LD4
 %token ST1
 %token ST2
-%token ST3
 %token ST4
 %token INC
 %token DEC
 %token CALL
 %token RET
-%token ST
-%token PC
 %token PUSH
 %token POP
 %token PRINT
 %token EXIT
+%token SYSCALL
+%token PUSHN
+%token POPN
+%token FPRINT
+%token SPRINT
 %token REGISTER
 %token L_INT
 %token L_HEX
 %token L_STRING
 %token IDENTIFIER
+%token LABEL
 %token STATIC
 %token CODE
 %token L_BRACKET
@@ -69,8 +71,6 @@ int yyerror(const char *msg)
 %token L_FLOAT 
 %token REGISTER_F
 
-
-%type <rindex> REGISTER_F
 %type <rindex> REGISTER
 %type <int_value> L_INT
 %type <int_value> L_HEX
@@ -90,10 +90,7 @@ int yyerror(const char *msg)
 %type <address> Address
 %type <print_arg_list> PrintArgList
 %type <printable> PrintArg
-
-
-%type <ternary> TernaryFloat
-%type <float_value> L_FLOAT 
+%type <str> LABEL
 
 %union {
 	char *str;
@@ -107,9 +104,6 @@ int yyerror(const char *msg)
   asmvm::Address* address;
   std::list<asmvm::Printable*> *print_arg_list;
   asmvm::Printable* printable;
-
-
-  float float_value; 
 }
 %%
 
@@ -146,8 +140,8 @@ Line:
   Instruction {
     asmvm::parser::StaticHolder::instance().vm().add_instruction($1);
   }
-  | IDENTIFIER COLON Instruction {
-    asmvm::parser::StaticHolder::instance().vm().add_labeled_instruction($1, $3);
+  | LABEL Instruction {
+    asmvm::parser::StaticHolder::instance().vm().add_labeled_instruction($1, $2);
   }
   ;
 
@@ -157,10 +151,6 @@ Value:
   }
   | IntValue {
     $$ = new asmvm::IntegerValue(asmvm::Value::kValueKindVar, $1);
-  }
-  | 
-    L_FLOAT {
-    $$ = new asmvm::FloatValue(asmvm::Value::kValueKindVar, $1);
   }
   ;
 
@@ -175,9 +165,6 @@ IntValue:
 
 Instruction: 
   TernaryInstructions {
-    $$ = $1;
-  }
-  | TernaryFloat{
     $$ = $1;
   }
   | NOT REGISTER REGISTER {
@@ -210,6 +197,12 @@ Instruction:
   | PUSH Source {
     $$ = new asmvm::OpPush($2);
   }
+  | PUSH IDENTIFIER {
+    asmvm::Value* v = NULL;
+    asmvm::parser::StaticHolder::instance().vm().GetSymbolValue($2, &v);
+    asmvm::IntegerValue* iv = static_cast<asmvm::IntegerValue*>(v);
+    $$ = new asmvm::OpPush(new asmvm::IntegerValue(*iv));
+  }
   | Pop {
     $$ = $1;
   }
@@ -224,6 +217,29 @@ Instruction:
   }
   | Print {
     $$ = $1;
+  }
+  | FPRINT REGISTER {
+    $$ = new asmvm::OpFprint($2);
+  }
+  | SPRINT REGISTER {
+    $$ = new asmvm::OpSprint($2);
+  }
+  | SPRINT IDENTIFIER {
+    asmvm::Value* v = NULL;
+    asmvm::AsmMachine& vm = asmvm::parser::StaticHolder::instance().vm();
+    vm.GetSymbolValue($2, &v);
+    asmvm::IntegerValue* iv = static_cast<asmvm::IntegerValue*>(v);
+    const char* str = reinterpret_cast<const char*>(vm.data() + iv->value(vm));
+    $$ = new asmvm::OpSprint(str);
+  }
+  | SYSCALL Source REGISTER {
+    $$ = new asmvm::OpSysCall($2, $3);
+  }
+  | PUSHN Source {
+    $$ = new asmvm::OpPushN($2->value(asmvm::parser::StaticHolder::instance().vm()));
+  }
+  | POPN Source {
+    $$ = new asmvm::OpPopN($2->value(asmvm::parser::StaticHolder::instance().vm()));
   }
   ;
 Move:
@@ -261,6 +277,12 @@ PrintArg:
   | Source {
     $$ = $1;
   }
+  | IDENTIFIER {
+    asmvm::Value* v = NULL;
+    asmvm::parser::StaticHolder::instance().vm().GetSymbolValue($1, &v);
+    asmvm::IntegerValue* iv = static_cast<asmvm::IntegerValue*>(v);
+    $$ = new asmvm::StringValue(asmvm::Value::kValueKindConst, iv->value());
+  }
   ;
   
 TernaryInstructions:
@@ -295,15 +317,6 @@ TernaryInstructions:
     $$ = new asmvm::OpShl($2, $3, $4);
   }
   ;
-
-
-  TernaryFloat:
-  ADDF Source Source REGISTER_F {
-    $$ = new asmvm::OpAddf($2, $3, $4)
-  }
-  ;
-
-
 Load:
   LD1 REGISTER Address {
     $$ = new asmvm::OpLd1($2, $3);
@@ -314,13 +327,10 @@ Load:
   | LD4 REGISTER Address {
     $$ = new asmvm::OpLd4($2, $3);
   }
-
-
   | LDF REGISTER_F Address {	//the group thomás
 	$$ = new asmvm::OpLdF($2, $3);
   }
   ;
-
 Source:
   REGISTER {
     $$ = new asmvm::RegisterSource($1);
@@ -335,7 +345,6 @@ Source:
 	$$ = new asmvm::FloatValue(asmvm::Value::kValueKindVar, $1);
   }
   ;
-  
 Address:
   Base {
     $$ = new asmvm::Address($1, NULL);

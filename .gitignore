@@ -1,0 +1,8 @@
+# Arquivos de configuração
+.vscode
+
+# Arquivos intermediarios
+*.o
+parser.*
+lexer.cpp
+asmvm_out.exe

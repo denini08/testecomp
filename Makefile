@@ -1,8 +1,8 @@
-all: asmvm
+all: asmvm_out
 
 CPPFLAGS=-std=gnu++11
 
-asmvm: asmvm.o op.o lexer.o parser.o main.o parser_aid.o
+asmvm_out: asmvm.o op.o lexer.o parser.o main.o parser_aid.o
 	g++ $(CPPFLAGS) *.o -o asmvm_out
 
 main.o: parser_aid.h parser.cpp main.cpp asmvm.h
@@ -24,7 +24,7 @@ asmvm.o: asmvm.cpp asmvm.h
 	g++ $(CPPFLAGS) -c asmvm.cpp
 
 lexer.cpp: asmvm.l parser.cpp
-	flex -o lexer.cpp asmvm.l
+	flex -olexer.cpp asmvm.l
 
 parser.cpp: asmvm.y
 	bison -v -d -o parser.cpp asmvm.y
@@ -36,7 +36,7 @@ clean:
 	rm -f parser.*
 	rm -f asmvm_out
 
-install: asmvm
-	cp asmvm /usr/local/bin
+install: asmvm_out
+	cp asmvm_out /usr/local/bin/asmvm
 	
 

@@ -54,22 +54,25 @@ int32_t hex2int(const char* hex) {
 "MV" { return MV; }
 "LD1" { return LD1; }
 "LD2" { return LD2; }
-"LD3" { return LD3; }
 "LD4" { return LD4; }
 "ST1" { return ST1; }
 "ST2" { return ST2; }
-"ST3" { return ST3; }
 "ST4" { return ST4; }
 "PRINT" { return PRINT; }
 "EXIT" { return EXIT; }
-"[" {return L_BRACKET;}
-"]" {return R_BRACKET;}
+"SYSCALL" { return SYSCALL; }
+"PUSHN" { return PUSHN; } 
+"POPN" { return POPN; }
+"FPRINT" { return FPRINT; }
+"SPRINT" { return SPRINT; }
+"[" { return L_BRACKET; }
+"]" { return R_BRACKET; }
 "=" { return ASSIGN; }
-":" {return COLON;}
-";" {BEGIN(COMENTARIO);}
-<COMENTARIO>\n {BEGIN(INITIAL); lineNumber++; }
+":" { return COLON; }
+";" { BEGIN(COMENTARIO); }
+<COMENTARIO>\n { BEGIN(INITIAL); lineNumber++; }
 <COMENTARIO>. {}
-    
+
 ST|PC|R[1-8] { 
     if (!strcmp(yytext, "ST")) {
         yylval.rindex = 9;
@@ -81,18 +84,17 @@ ST|PC|R[1-8] {
     --yylval.rindex;
     return REGISTER;
 }
-
-"R11"               {yylval.rindex = 10 ; return REGISTER_F;} 
-"R12"               {yylval.rindex = 11 ; return REGISTER_F;}
-"R13"               {yylval.rindex = 12 ; return REGISTER_F;}
-"R14"               {yylval.rindex = 13 ; return REGISTER_F;}
+"F1"               {yylval.rindex = 0 ; return REGISTER_F;}	//the group thomás-thiago
+"F2"               {yylval.rindex = 1 ; return REGISTER_F;}	//the group thomás-thiago
+"F3"               {yylval.rindex = 2 ; return REGISTER_F;}	//the group thomás-thiago
+"F4"               {yylval.rindex = 3 ; return REGISTER_F;}	//the group thomás-thiago
 "ADDF"              {return ADDF;}  //the group Denini
 "LDF"				{return LDF;}	//the group thomás
-
-(0|[+-]?[1-9][0-9]*)\.([0-9]+) { yylval.float_value = atof(yytext); return L_FLOAT;} 
+(0|[+-]?[1-9][0-9]*)\.([0-9]+) { yylval.float_value = atof(yytext); return L_FLOAT;} 	//the group
 0|[+-]?[1-9][0-9]* { yylval.int_value = atoi(yytext); return L_INT; }
 0x[0-9A-F]+ { yylval.int_value = hex2int(yytext+2); return L_HEX; }
 [a-zA-Z_][a-zA-Z0-9_]* { yylval.str = strdup(yytext); return IDENTIFIER; }
+[a-zA-Z_][a-zA-Z0-9_]*: { yytext[strlen(yytext)-1] = '\0'; yylval.str = strdup(yytext); return LABEL; }
 [\r\t ] {}
 \n { lineNumber++; }
 "\"" { BEGIN(STRING); literal_value = ""; }
@@ -102,4 +104,5 @@ ST|PC|R[1-8] {
 <STRING>\\n { literal_value += '\n'; lineNumber++; }
 <STRING>. { literal_value += yytext; }
 . { yyerror("Invalid character."); }
+
 %%

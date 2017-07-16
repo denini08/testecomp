@@ -48,6 +48,7 @@ class AsmMachine {
   AsmMachine();
   ~AsmMachine();
     
+  const uint8_t* data() const { return data_memory_; }
   void AddSymbol(const std::string& name, Value* value);
   
   void add_instruction(Instruction* instruction) {
@@ -60,8 +61,16 @@ class AsmMachine {
     return register_set_[rindex];
   }
   
+  float get_f_register(uint32_t rindex) const {	//the group thomás
+	return f_register_set_[rindex];
+  }
+  
   void set_register(uint32_t rindex, int32_t value) {
     register_set_[rindex] = value;
+  }
+  
+  void f_set_register(uint32_t rindex, float value) {	//the group thomás
+    f_register_set_[rindex] = value;
   }
   
   uint32_t reg_PC() const { return register_set_[kRegisterIndexPc]; }
@@ -124,6 +133,26 @@ class AsmMachine {
     return true;
   }
 
+  uint32_t fopen(const char* filename, const char* mode) {
+    FILE* f = ::fopen(filename, mode);
+    if (!f) return 0;
+    open_files_.push_back(f);
+    return open_files_.size();
+  }
+
+  void fclose(uint32_t handler) {
+    ::fclose(open_files_[handler-1]);
+    open_files_[handler-1] = NULL;
+  }
+
+  FILE* file(uint32_t handler) {
+    if (handler > open_files_.size()) {
+      return NULL;
+    } else {
+      return open_files_[handler-1];
+    }
+  }
+
  private:
   inline void reset_registers();
   void log_regs() {
@@ -140,9 +169,11 @@ class AsmMachine {
   SymbolTable symbol_table_;
   uint8_t data_memory_[kDefaultMemorySize];
   std::vector<Instruction*> program_;
-  int32_t register_set_[14]; // 8 general purpose registers + 2 specific: ST and PC. the group
+  int32_t register_set_[10]; // 8 general purpose registers + 2 specific: ST and PC.
+  float f_register_set_[4]; // 4 general purpose float registers the group thomás-thiago
   uint32_t static_data_end_addr_;
   std::vector<uint32_t> call_stack_;
+  std::vector<FILE*> open_files_;
 };
 
 } // namespace asmvm

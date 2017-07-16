@@ -1,4 +1,6 @@
 #include "op.h"
+#include <thread>
+#include <chrono>
 
 namespace asmvm {
 
@@ -171,6 +173,7 @@ int32_t OpPrint::Exec(AsmMachine& vm) {
   for (auto i = printables_.begin(); i != printables_.end(); i++) {
     printf("%s", (*i)->str(vm).c_str());
   }
+  fflush(stdout);
   return vm.reg_PC() + 1;
 }
 
@@ -201,7 +204,6 @@ int32_t OpLd4::Exec(AsmMachine& vm) {
   return vm.reg_PC() + 1;
 }
 
-
 float OpLdF::Exec(AsmMachine& vm) {	//the group thomás
   float value;
   if (!vm.load_value(address_->address(vm), 0, &value)) {
@@ -210,5 +212,194 @@ float OpLdF::Exec(AsmMachine& vm) {	//the group thomás
   vm.set_register(rindex_, value);
   return vm.reg_PC() + 1;
 }
+
+enum SysCallCode {
+  kSysCallFopen = 0,
+  kSysCallFclose = 1,
+  kSysCallFprint = 2,
+  kSysCallReadString = 3,
+  kSysCallReadInt = 4,
+  kSysCallReadFloat = 5,
+  kSysCallSleep,
+  kSysCallFread,
+  kSysCallFwrite,
+  kSysCallFseek,
+  kSysCallNow,
+  kSysCallSocket,
+  kSysCallTCPConnect,
+  kSysCallSend,
+  kSysCallRecv,
+  kSysCallListen,
+  kSysCallBind
+};
+
+enum OpenMode {
+  kOpenModeRead = 1,
+  kOpenModeWrite = 2,
+  kOpenModeCreate = 4,
+  kOpenModeBinary = 8,
+  kOpenModeAppend = 16
+};
+
+enum ParamType {
+  kTypeString = 0,
+  kTypeInt,
+  kTypeFloat,
+  kTypeNoMoreParams
+};
+
+union float_wrapper {
+    int32_t i;
+    float f;
+};
+
+
+int32_t OpSysCall::Exec(AsmMachine& vm) {
+  int32_t function_code = src_->value(vm);
+  int32_t pointer;
+  int32_t mode;
+  int32_t nparams;
+  int32_t handler = 0;
+  int32_t ret = 0;
+  const char* filename = NULL;
+  switch (function_code) {
+  case kSysCallFopen:
+    //printf("[kSysCallFopen]\n");
+    vm.pop(&pointer);
+    vm.pop(&mode);
+    filename = (const char*)vm.data() + pointer;
+    if ((mode & (kOpenModeRead)) == kOpenModeRead) {
+      handler = vm.fopen(filename, "r");
+    } else if ((mode & (kOpenModeRead | kOpenModeWrite)) == (kOpenModeRead | kOpenModeWrite)) {
+      handler = vm.fopen(filename, "r+");
+    } else if ((mode & (kOpenModeRead | kOpenModeWrite | kOpenModeCreate | kOpenModeBinary)) == (kOpenModeRead | kOpenModeWrite | kOpenModeCreate | kOpenModeBinary)) {
+      handler = vm.fopen(filename, "wb+");
+    } else if ((mode & (kOpenModeRead | kOpenModeWrite | kOpenModeCreate)) == (kOpenModeRead | kOpenModeWrite | kOpenModeCreate)) {
+      handler = vm.fopen(filename, "w+");
+    } else if ((mode & (kOpenModeWrite | kOpenModeCreate)) == (kOpenModeWrite | kOpenModeCreate)) {
+      handler = vm.fopen(filename, "w");
+    } else if ((mode & (kOpenModeRead | kOpenModeWrite | kOpenModeBinary)) == (kOpenModeRead | kOpenModeWrite | kOpenModeBinary)) {
+      handler = vm.fopen(filename, "rb+");
+    } else if ((mode & (kOpenModeRead | kOpenModeBinary)) == (kOpenModeRead | kOpenModeBinary)) {
+      handler = vm.fopen(filename, "rb");
+    } else if ((mode & (kOpenModeWrite | kOpenModeBinary)) == (kOpenModeWrite | kOpenModeBinary)) {
+      handler = vm.fopen(filename, "wb");
+    } else if ((mode & (kOpenModeAppend | kOpenModeBinary)) == (kOpenModeAppend | kOpenModeBinary)) {
+      handler = vm.fopen(filename, "ab");
+    } else if ((mode & (kOpenModeAppend)) == kOpenModeAppend) {
+      handler = vm.fopen(filename, "a");
+    } else if ((mode & (kOpenModeAppend | kOpenModeRead | kOpenModeBinary)) == (kOpenModeAppend | kOpenModeRead | kOpenModeBinary)) {
+      handler = vm.fopen(filename, "ab+");
+    } else if ((mode & (kOpenModeAppend | kOpenModeRead )) == (kOpenModeAppend | kOpenModeRead )) {
+      handler = vm.fopen(filename, "a+");
+    }
+    if (handler == 0) ret = 1;
+    vm.push_value(handler);
+    break;
+  case kSysCallFclose:
+    vm.pop(&handler);
+    vm.fclose(handler);
+    break;
+  case kSysCallFprint: {
+      int type = -1;
+      vm.pop(&handler);
+      const char* str = NULL;
+      int32_t value;
+      vm.pop(&type);
+      switch (type) {
+      case kTypeString:
+        vm.pop(&pointer);
+        str = (const char*)vm.data() + pointer;
+        //printf("[kSysCallFprint] str = [%s]\n", str);
+        fprintf(vm.file(handler), "%s", str);
+        break;
+      case kTypeInt:
+        vm.pop(&value);
+        fprintf(vm.file(handler), "%d", value);
+        //printf("[kSysCallFprint] int = [%d]\n", value);
+        break;
+      case kTypeFloat: {
+          float_wrapper u;
+          vm.pop(&value);
+          u.i = value;
+          fprintf(vm.file(handler), "%f", u.f);
+        }
+        break;
+      }
+    }
+    fflush(vm.file(handler));
+    break;
+  case kSysCallReadString: {
+      char* str = NULL;
+      int32_t size = 0;
+      vm.pop(&handler);
+      vm.pop(&size); // Size of the string
+      vm.pop(&pointer); // Address of the string
+      str = (char*)vm.data() + pointer;
+      char* res = fgets(str, size, vm.file(handler));
+      if (res == NULL) {
+        ret = 1;
+      }
+    }
+    break;
+  case kSysCallReadInt: {
+      int32_t value = 0;
+      vm.pop(&handler);
+      int res = fscanf(vm.file(handler), "%d", &value);
+      if (res != 1) {
+        ret = 1;
+      }
+      vm.push_value(value);
+    }
+    break;
+  case kSysCallReadFloat: {
+      float value = 0.0F;
+      vm.pop(&handler);
+      int res = fscanf(vm.file(handler), "%f", &value);
+      if (res != 1) {
+        ret = 1;
+      }
+      vm.push_value(value);
+    }
+    break;
+  case kSysCallSleep: {
+      int32_t ms = 0;   
+      vm.pop(&ms);
+      std::this_thread::sleep_for(std::chrono::milliseconds((uint32_t)ms));
+    }
+    break;
+  }
+  vm.set_register(rindex_, ret);
+  return vm.reg_PC() + 1;
+}
+
+int32_t OpPushN::Exec(AsmMachine& vm) {
+  vm.set_register(kRegisterIndexSt, vm.reg_ST() + bytes_);
+  return vm.reg_PC() + 1;
+}
+
+int32_t OpPopN::Exec(AsmMachine& vm) {
+  vm.set_register(kRegisterIndexSt, vm.reg_ST() - bytes_);
+  return vm.reg_PC() + 1;
+}
+
+int32_t OpFprint::Exec(AsmMachine& vm) {
+  float_wrapper u;
+  u.i = vm.get_register(rindex_);
+  printf("%f", u.f);
+  fflush(stdout);
+  return vm.reg_PC() + 1;
+}
+
+int32_t OpSprint::Exec(AsmMachine& vm) {
+  if (reg_) {
+    int32_t pointer = vm.get_register(rindex_);
+    str_ = reinterpret_cast<const char*>(vm.data() + pointer);
+  }
+  printf("%s", str_);
+  fflush(stdout);
+  return vm.reg_PC() + 1;
+}
+
 
 } // namespace asmvm
