@@ -35,7 +35,6 @@ class Instruction {
  public:
   virtual ~Instruction() {}
   virtual int32_t Exec(AsmMachine& vm) = 0;
-  virtual float Exec_f(AsmMachine& vm) = 0;	//the group thomás 16/07
 };
 
 const uint32_t kDefaultMemorySize = 2048; // 2KB
@@ -69,7 +68,8 @@ class AsmMachine {
   void set_register(uint32_t rindex, int32_t value) {
     register_set_[rindex] = value;
   }
-  void set_f_register(uint32_t rindex, float value) {	//the group thomás
+  
+  void f_set_register(uint32_t rindex, float value) {	//the group thomás
     f_register_set_[rindex] = value;
   }
   

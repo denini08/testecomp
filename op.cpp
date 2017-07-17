@@ -1,4 +1,4 @@
-	#include "op.h"
+#include "op.h"
 #include <thread>
 #include <chrono>
 
@@ -9,8 +9,8 @@ int32_t OpAdd::Exec(AsmMachine& vm) {
   return vm.reg_PC() + 1;
 }
 
-float OpAddf::Exec_f(AsmMachine& vm) { //the group geovanne and thomás 16/07
-  vm.set_f_register(output_rindex(), param1()->value(vm) + param2()->value(vm));
+float OpAddf::Exec(AsmMachine& vm) { //the group geovanne
+  vm.set_register(output_rindex(), param1()->value(vm) + param2()->value(vm));
   return vm.reg_PC() + 1;
 }
 
@@ -204,12 +204,12 @@ int32_t OpLd4::Exec(AsmMachine& vm) {
   return vm.reg_PC() + 1;
 }
 
-float OpLdF::Exec_f(AsmMachine& vm) {	//the group thomás
+float OpLdF::Exec(AsmMachine& vm) {	//the group thomás
   float value;
   if (!vm.load_value(address_->address(vm), 0, &value)) {
     printf("Invalid address [%d]. Default memory size = %d.\n", address_->address(vm), kDefaultMemorySize);
   }
-  vm.set_f_register(rindex_, value);
+  vm.set_register(rindex_, value);
   return vm.reg_PC() + 1;
 }
 

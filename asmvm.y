@@ -4,7 +4,7 @@
 #include <iostream>
 #include <list>
 #include "op.h"
-#include "asmvm.h"		
+#include "asmvm.h"
 #include "params.h"
 #include "parser_aid.h"
 
@@ -92,20 +92,10 @@ int yyerror(const char *msg)
 %type <printable> PrintArg
 %type <str> LABEL
 
-/*---the group thomás 16/07 inicio---*/
-%type <rindex> REGISTER_F	
-%type <addres> Address_f
-%type <source> Source_f
-%type <float_value> L_FLOAT
-%type <base> Base_f
-/*---the group thomás 16/07 fim---*/
-
-
 %union {
 	char *str;
   uint32_t rindex;
   int32_t int_value;
-  float float_value;	//the group thomás 16/07
   asmvm::Value* value;
   asmvm::Instruction* instruction;
   asmvm::TernaryInstruction* ternary;
@@ -299,9 +289,6 @@ TernaryInstructions:
   ADD Source Source REGISTER {
     $$ = new asmvm::OpAdd($2, $3, $4);
   }
-  ADDF Source_f Source_f REGISTER_F {
-	$$ = new asmvm::OpAddf($2, $3, $4);
-  }
   | SUB Source Source REGISTER {
     $$ = new asmvm::OpSub($2, $3, $4);
   }
@@ -340,31 +327,24 @@ Load:
   | LD4 REGISTER Address {
     $$ = new asmvm::OpLd4($2, $3);
   }
-  | LDF REGISTER_F Address_f {	//the group thomás
+  | LDF REGISTER_F Address {	//the group thomás
 	$$ = new asmvm::OpLdF($2, $3);
   }
   ;
-
-  
 Source:
   REGISTER {
     $$ = new asmvm::RegisterSource($1);
   }
+  | REGISTER_F {
+    $$ = new asmvm::RegisterSource_F($1);	//the group thomás
+  }
   | IntValue {
     $$ = new asmvm::IntegerValue(asmvm::Value::kValueKindConst, $1);
-  }
-  ;
-
-Source_f:	//the group thomás 16/07
-  REGISTER_F {
-    $$ = new asmvm::RegisterSource_F($1);	//the group thomás
   }
   | L_FLOAT {	//the group thomás
 	$$ = new asmvm::FloatValue(asmvm::Value::kValueKindVar, $1);
   }
-  | Source
   ;
-
 Address:
   Base {
     $$ = new asmvm::Address($1, NULL);
@@ -373,37 +353,9 @@ Address:
     $$ = new asmvm::Address($1, $3);
   }
   ;
-
-Address_f:	//the group thomás 16/07
-  Base {
-    $$ = new asmvm::Address($1, NULL);
-  }
-  | Base L_BRACKET Source R_BRACKET {
-    $$ = new asmvm::Address($1, $3);
-  }
-  | Base_f L_BRACKET Source_f R_BRACKET {
-	$$ = new asmvm::Address($1, $3);
-  }
-  ;
-  
 Base:
   REGISTER {
     $$ = new asmvm::BaseAddressRegister($1);
-  }
-  | L_HEX {
-    $$ = new asmvm::BaseAddressHex($1);
-  }
-  | IDENTIFIER {
-    $$ = new asmvm::BaseAddressVar($1);
-  }
-  ;
-  
-Base_f:
-  REGISTER {
-    $$ = new asmvm::BaseAddressRegister($1);
-  }
-  REGISTER_F {
-	$$ = new asmvm::BaseAddressRegister($1);
   }
   | L_HEX {
     $$ = new asmvm::BaseAddressHex($1);
