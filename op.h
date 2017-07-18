@@ -37,7 +37,7 @@ class OpAddf : public TernaryInstruction { //the group geovanne and Thomás 16/0
  public:
   OpAddf(Source* param1, Source* param2, uint32_t output_rindex) 
     : TernaryInstruction(param1, param2, output_rindex) {}
-  float Exec_f(AsmMachine& vm);
+  int32_t Exec(AsmMachine& vm);
 };
 
 class OpSub : public TernaryInstruction {
@@ -222,7 +222,7 @@ class OpLd4 : public OpLoad {
 class OpLdF : public OpLoad { //the group geovanne
  public:
   OpLdF(uint32_t rindex, Address* address) : OpLoad(rindex, address) {}
-  float Exec_f(AsmMachine& vm);
+  int32_t Exec(AsmMachine& vm);
 };
 
 class OpExit : public Instruction {

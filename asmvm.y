@@ -94,10 +94,9 @@ int yyerror(const char *msg)
 
 /*---the group thomás 16/07 inicio---*/
 %type <rindex> REGISTER_F	
-%type <addres> Address_f
+%type <address> Address_f
 %type <source> Source_f
 %type <float_value> L_FLOAT
-%type <base> Base_f
 /*---the group thomás 16/07 fim---*/
 
 
@@ -299,6 +298,7 @@ TernaryInstructions:
   ADD Source Source REGISTER {
     $$ = new asmvm::OpAdd($2, $3, $4);
   }
+  |
   ADDF Source_f Source_f REGISTER_F {
 	$$ = new asmvm::OpAddf($2, $3, $4);
   }
@@ -381,7 +381,7 @@ Address_f:	//the group thomás 16/07
   | Base L_BRACKET Source R_BRACKET {
     $$ = new asmvm::Address($1, $3);
   }
-  | Base_f L_BRACKET Source_f R_BRACKET {
+  | Base L_BRACKET Source_f R_BRACKET {
 	$$ = new asmvm::Address($1, $3);
   }
   ;
@@ -396,20 +396,9 @@ Base:
   | IDENTIFIER {
     $$ = new asmvm::BaseAddressVar($1);
   }
-  ;
-  
-Base_f:
-  REGISTER {
-    $$ = new asmvm::BaseAddressRegister($1);
-  }
+  |
   REGISTER_F {
-	$$ = new asmvm::BaseAddressRegister($1);
-  }
-  | L_HEX {
-    $$ = new asmvm::BaseAddressHex($1);
-  }
-  | IDENTIFIER {
-    $$ = new asmvm::BaseAddressVar($1);
+  $$ = new asmvm::BaseAddressRegister($1);
   }
   ;
 

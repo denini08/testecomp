@@ -35,7 +35,6 @@ class Instruction {
  public:
   virtual ~Instruction() {}
   virtual int32_t Exec(AsmMachine& vm) = 0;
-  virtual float Exec_f(AsmMachine& vm) = 0;	//the group thomás 16/07
 };
 
 const uint32_t kDefaultMemorySize = 2048; // 2KB
