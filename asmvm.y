@@ -95,6 +95,7 @@ int yyerror(const char *msg)
 /*---the group thomás 16/07 inicio---*/
 %type <rindex> REGISTER_F	
 %type <float_value> L_FLOAT
+%type <float_value> floatValue
 
 /*---the group thomás 16/07 fim---*/
 
@@ -355,10 +356,16 @@ Source:
   |REGISTER_F {
     $$ = new asmvm::RegisterSource_F($1);	//the group thomás
   }
-  | L_FLOAT {	//the group thomás
+  | floatValue {	//the group thomás
 	$$ = new asmvm::FloatValue(asmvm::Value::kValueKindConst_f, $1);
   }
  ;
+
+floatValue:   //Denini, mudei isso aqui PS: ver linha 98
+  L_FLOAT{
+  $$ = $1;
+  }
+  ;
 
 Address: //the group
   Base {

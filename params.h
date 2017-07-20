@@ -143,7 +143,7 @@ class RegisterSource : public Source {
 class RegisterSource_F : public Source_f {	//the group
  public:
   explicit RegisterSource_F(uint32_t rindex) : rindex_(rindex) {}
-  float FloatValue(AsmMachine& vm) const { return vm.get_f_register(rindex_); }
+  float value_f(AsmMachine& vm) const { return vm.get_f_register(rindex_); } //erro tava aqui, nome da variavel
  private:
   uint32_t rindex_;
 };
