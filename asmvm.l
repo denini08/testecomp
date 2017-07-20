@@ -89,6 +89,9 @@ ST|PC|R[1-8] {
 "F3"               {yylval.rindex = 2 ; return REGISTER_F;}	//the group thomás-thiago
 "F4"               {yylval.rindex = 3 ; return REGISTER_F;}	//the group thomás-thiago
 "ADDF"              {return ADDF;}  //the group Denini
+"SUBF"              {return SUBF;} //the group geovanne
+"MULF"              {return MULF;} //the group geovanne
+"DIVF"              {return DIVF;} //the group geovanne
 "LDF"				{return LDF;}	//the group thomás
 (0|[+-]?[1-9][0-9]*)\.([0-9]+) { yylval.float_value = atof(yytext); return L_FLOAT;} 	//the group
 0|[+-]?[1-9][0-9]* { yylval.int_value = atoi(yytext); return L_INT; }

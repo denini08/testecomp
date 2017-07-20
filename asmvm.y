@@ -66,7 +66,11 @@ int yyerror(const char *msg)
 %token COLON
 %token ASSIGN
 
+
 %token ADDF
+%token SUBF
+%token MULF
+%token DIVF
 %token LDF
 %token L_FLOAT 
 %token REGISTER_F
@@ -301,10 +305,6 @@ TernaryInstructions:
   ADD Source Source REGISTER {
     $$ = new asmvm::OpAdd($2, $3, $4);
   }
-  |
-  ADDF Source Source REGISTER_F {
-	$$ = new asmvm::OpAddf($2, $3, $4);
-  }
   | SUB Source Source REGISTER {
     $$ = new asmvm::OpSub($2, $3, $4);
   }
@@ -331,6 +331,18 @@ TernaryInstructions:
   }
   | SHL Source Source REGISTER {
     $$ = new asmvm::OpShl($2, $3, $4);
+  }
+  |ADDF Source Source REGISTER_F {
+  $$ = new asmvm::OpAddf($2, $3, $4);
+  }
+  |SUBF Source Source REGISTER_F {
+  $$ = new asmvm::OpSubf($2, $3, $4);
+  }
+  |MULF Source Source REGISTER_F {
+  $$ = new asmvm::OpMulf($2, $3, $4);
+  }
+  |DIVF Source Source REGISTER_F {
+  $$ = new asmvm::OpDivf($2, $3, $4);
   }
   ;
 Load:

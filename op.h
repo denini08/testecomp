@@ -40,6 +40,28 @@ class OpAddf : public TernaryInstruction { //the group geovanne and Thomás 16/0
   int32_t Exec(AsmMachine& vm);
 };
 
+class OpSubf : public TernaryInstruction { //the group geovanne 
+ public:
+  OpSubf(Source* param1, Source* param2, uint32_t output_rindex) 
+    : TernaryInstruction(param1, param2, output_rindex) {}
+  int32_t Exec(AsmMachine& vm);
+};
+
+class OpMulf : public TernaryInstruction { //the group geovanne 
+ public:
+  OpMulf(Source* param1, Source* param2, uint32_t output_rindex) 
+    : TernaryInstruction(param1, param2, output_rindex) {}
+  int32_t Exec(AsmMachine& vm);
+};
+
+class OpDivf : public TernaryInstruction { //the group geovanne
+ public:
+  OpDivf(Source* param1, Source* param2, uint32_t output_rindex) 
+    : TernaryInstruction(param1, param2, output_rindex) {}
+  int32_t Exec(AsmMachine& vm);
+};
+
+
 class OpSub : public TernaryInstruction {
  public:
   OpSub(Source* param1, Source* param2, uint32_t output_rindex) 

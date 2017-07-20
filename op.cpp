@@ -9,8 +9,23 @@ int32_t OpAdd::Exec(AsmMachine& vm) {
   return vm.reg_PC() + 1;
 }
 
-int32_t OpAddf::Exec(AsmMachine& vm) { //the group geovanne and thomás 16/07
+int32_t OpAddf::Exec(AsmMachine& vm) { //the group geovanne and thomás   --- {retornando erro no int32_t pois o dá erro no exec}
   vm.set_f_register(output_rindex(), param1()->value(vm) + param2()->value(vm));
+  return vm.reg_PC() + 1;
+}
+
+int32_t OpSubf::Exec(AsmMachine& vm) { //the group geovanne 
+  vm.set_f_register(output_rindex(), param1()->value(vm) - param2()->value(vm));
+  return vm.reg_PC() + 1;
+}
+
+int32_t OpMulf::Exec(AsmMachine& vm) { //the group geovanne
+  vm.set_f_register(output_rindex(), param1()->value(vm) * param2()->value(vm));
+  return vm.reg_PC() + 1;
+}
+
+int32_t OpDivf::Exec(AsmMachine& vm) { //the group geovanne 
+  vm.set_f_register(output_rindex(), param1()->value(vm) / param2()->value(vm));
   return vm.reg_PC() + 1;
 }
 
