@@ -24,7 +24,8 @@ class Source : public Printable {
  public:
   virtual ~Source() {}
   virtual int32_t value(AsmMachine& vm) const = 0;
-  
+  virtual float value_f(AsmMachine& vm) const = 0;
+
   std::string str(AsmMachine& vm) const {
     std::stringstream ss; 
     ss << value(vm);
@@ -128,12 +129,12 @@ class RegisterSource : public Source {
   uint32_t rindex_;
 };
 
-class RegisterSource_F : public Source {	//the group
+class RegisterSource_F : public Source {	//the group -
  public:
-  explicit RegisterSource_F(float rindex) : rindex_(rindex) {}
-  float FloatValue(AsmMachine& vm) const { return vm.get_register(rindex_); }
+  explicit RegisterSource_F(uint32_t rindex) : rindex_(rindex) {}
+  float FloatValue(AsmMachine& vm) const { return vm.get_f_register(rindex_); }
  private:
-  float rindex_;
+  uint32_t rindex_;
 };
 
 class BaseAddressRegister : public BaseAddress {

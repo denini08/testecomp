@@ -94,8 +94,6 @@ int yyerror(const char *msg)
 
 /*---the group thomás 16/07 inicio---*/
 %type <rindex> REGISTER_F	
-%type <address> Address_f
-%type <source> Source_f
 %type <float_value> L_FLOAT
 /*---the group thomás 16/07 fim---*/
 
@@ -299,7 +297,7 @@ TernaryInstructions:
     $$ = new asmvm::OpAdd($2, $3, $4);
   }
   |
-  ADDF Source_f Source_f REGISTER_F {
+  ADDF Source Source REGISTER_F {
 	$$ = new asmvm::OpAddf($2, $3, $4);
   }
   | SUB Source Source REGISTER {
@@ -340,7 +338,7 @@ Load:
   | LD4 REGISTER Address {
     $$ = new asmvm::OpLd4($2, $3);
   }
-  | LDF REGISTER_F Address_f {	//the group thomás
+  | LDF REGISTER_F Address {	//the group thomás
 	$$ = new asmvm::OpLdF($2, $3);
   }
   ;
@@ -353,36 +351,20 @@ Source:
   | IntValue {
     $$ = new asmvm::IntegerValue(asmvm::Value::kValueKindConst, $1);
   }
-  ;
-
-Source_f:	//the group thomás 16/07
-  REGISTER_F {
+  |REGISTER_F {
     $$ = new asmvm::RegisterSource_F($1);	//the group thomás
   }
   | L_FLOAT {	//the group thomás
 	$$ = new asmvm::FloatValue(asmvm::Value::kValueKindVar, $1);
   }
-  | Source
-  ;
+ ;
 
-Address:
+Address: //the group
   Base {
     $$ = new asmvm::Address($1, NULL);
   }
   | Base L_BRACKET Source R_BRACKET {
     $$ = new asmvm::Address($1, $3);
-  }
-  ;
-
-Address_f:	//the group thomás 16/07
-  Base {
-    $$ = new asmvm::Address($1, NULL);
-  }
-  | Base L_BRACKET Source R_BRACKET {
-    $$ = new asmvm::Address($1, $3);
-  }
-  | Base L_BRACKET Source_f R_BRACKET {
-	$$ = new asmvm::Address($1, $3);
   }
   ;
   
