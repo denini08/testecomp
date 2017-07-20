@@ -161,6 +161,9 @@ Value:
   | IntValue {
     $$ = new asmvm::IntegerValue(asmvm::Value::kValueKindVar, $1);
   }
+  | L_FLOAT{
+    $$ = new asmvm::FloatValue(asmvm::Value::kValueKindVar, $1);
+  }
   ;
 
 IntValue:
@@ -357,7 +360,7 @@ Source:
     $$ = new asmvm::RegisterSource_F($1);	//the group thomás
   }
   | floatValue {	//the group thomás
-	$$ = new asmvm::FloatValue(asmvm::Value::kValueKindConst_f, $1);
+	 $$ = new asmvm::FloatValue(asmvm::Value::kValueKindConst_f, $1);
   }
  ;
 
