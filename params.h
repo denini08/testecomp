@@ -24,11 +24,22 @@ class Source : public Printable {
  public:
   virtual ~Source() {}
   virtual int32_t value(AsmMachine& vm) const = 0;
-  virtual float value_f(AsmMachine& vm) const = 0;
-
+  
   std::string str(AsmMachine& vm) const {
     std::stringstream ss; 
     ss << value(vm);
+    return ss.str();
+  }
+};
+
+class Source_f : public Printable_f {
+ public:
+  virtual ~Source_f() {}
+  virtual float value_f(AsmMachine& vm) const = 0;
+  
+  std::string str(AsmMachine& vm) const {
+    std::stringstream ss; 
+    ss << value_f(vm);
     return ss.str();
   }
 };
@@ -105,20 +116,20 @@ class IntegerValue : public Value, public Source {
   int32_t value_;
 };
 
-class FloatValue: public Value, public Printable_f{    //the group Denini
+class FloatValue: public Value, public Source_f{    //the group Denini
 public:
-  FloatValue(ValueKind kind) : Value(kind), value_(0){}
-  explicit FloatValue(ValueKind kind, float value): Value(kind), value_(value){}
-  FloatValue(const FloatValue& sv) : Value(sv.kind()), value_(sv.value_){}
+  FloatValue(ValueKind kind) : Value(kind), value_f_(0){}
+  explicit FloatValue(ValueKind kind, float value): Value(kind), value_f_(value){}
+  FloatValue(const FloatValue& sv) : Value(sv.kind()), value_f_(sv.value_f_){}
   FloatValue& operator = (const FloatValue& sv){
-    value_ = sv.value_;
+    value_f_ = sv.value_f_;
     return *this;
   }
   ValueType type() const { return kValueTypeFloat;}
-  float value() const { return value_;}
-  float value_f(AsmMachine& vm) const { return value_; }
+  float value() const { return value_f_;}
+  float value_f(AsmMachine& vm) const { return value_f_; }
   private:
-    float value_;
+    float value_f_;
 };
 
 class RegisterSource : public Source {
@@ -129,7 +140,7 @@ class RegisterSource : public Source {
   uint32_t rindex_;
 };
 
-class RegisterSource_F : public Source {	//the group -
+class RegisterSource_F : public Source_f {	//the group
  public:
   explicit RegisterSource_F(uint32_t rindex) : rindex_(rindex) {}
   float FloatValue(AsmMachine& vm) const { return vm.get_f_register(rindex_); }

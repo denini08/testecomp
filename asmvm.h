@@ -20,7 +20,8 @@ class Value {
   enum ValueKind {
     kValueKindVar,
     kValueKindLabel,
-    kValueKindConst
+    kValueKindConst,
+	kValueKindConst_f,	//the group thomás 20/07
   };
   explicit Value(ValueKind kind) : kind_(kind) {}
   virtual ~Value() {}
@@ -30,6 +31,7 @@ class Value {
   ValueKind kind_;
 
 };
+
 
 class Instruction {
  public:
@@ -68,8 +70,8 @@ class AsmMachine {
   void set_register(uint32_t rindex, int32_t value) {
     register_set_[rindex] = value;
   }
-  void set_f_register(uint32_t rindex, float value) {	//the group thomás
-    f_register_set_[rindex] = value;
+  void set_f_register(uint32_t rindex, float value_f) {	//the group thomás
+    f_register_set_[rindex] = value_f;
   }
   
   uint32_t reg_PC() const { return register_set_[kRegisterIndexPc]; }
