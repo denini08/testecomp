@@ -161,7 +161,7 @@ Value:
   | IntValue {
     $$ = new asmvm::IntegerValue(asmvm::Value::kValueKindVar, $1);
   }
-  | L_FLOAT{
+  | floatValue{
     $$ = new asmvm::FloatValue(asmvm::Value::kValueKindVar, $1);
   }
   ;
@@ -356,7 +356,7 @@ Source:
   | IntValue {
     $$ = new asmvm::IntegerValue(asmvm::Value::kValueKindConst, $1);
   }
-  |REGISTER_F {
+  | REGISTER_F {
     $$ = new asmvm::RegisterSource_F($1);	//the group thomás
   }
   | floatValue {	//the group thomás
@@ -364,7 +364,7 @@ Source:
   }
  ;
 
-floatValue:   //Denini, mudei isso aqui PS: ver linha 98
+floatValue:   //Denini, mudei isso aqui PS: ver linha 98/ GEovanne - coloquei em value
   L_FLOAT{
   $$ = $1;
   }
@@ -390,7 +390,7 @@ Base:
     $$ = new asmvm::BaseAddressVar($1);
   }
   |
-  REGISTER_F {
+  REGISTER_F { //the group
   $$ = new asmvm::BaseAddressRegister($1);
   }
   ;
